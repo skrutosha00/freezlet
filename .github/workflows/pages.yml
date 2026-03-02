@@ -27,9 +27,10 @@ jobs:
       - run: npm run build
       - name: Prepare site artifact
         run: |
-          mkdir -p site
+          mkdir -p site/src
           cp index.html styles.css site/
-          cp -R src/ui dist site/
+          cp -R src/ui site/src/
+          cp -R dist site/
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
