@@ -1,0 +1,15 @@
+select {
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--control-text);
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+select:focus {
+  border-color: var(--control-border-focus);
+  background: var(--control-bg-focus);
+  outline: 2px solid var(--focus-color);
+  outline-offset: 0;
+}

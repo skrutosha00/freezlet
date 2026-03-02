@@ -1,0 +1,78 @@
+.btn {
+  border: 1px solid var(--btn-neutral-border);
+  background: var(--btn-neutral-bg);
+  color: var(--text-main);
+  transition:
+    transform 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.btn:hover {
+  background: var(--btn-neutral-bg-hover);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn[disabled] {
+  background: var(--surface-1);
+  border-color: var(--border-subtle);
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.btn.btn-big {
+  padding: 14px 28px;
+  border-radius: 8px;
+  min-width: 220px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.btn.btn-neutral,
+.btn.ghost {
+  background: var(--btn-neutral-bg);
+  border-color: var(--btn-neutral-border);
+}
+
+.btn.btn-neutral:hover,
+.btn.ghost:hover {
+  background: var(--btn-neutral-bg-hover);
+}
+
+.btn.btn-blue,
+.btn.primary {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+}
+
+.btn.btn-blue:hover,
+.btn.primary:hover {
+  background: var(--btn-primary-bg-hover);
+}
+
+.btn.btn-red,
+.btn.danger {
+  background: var(--btn-danger-bg);
+  border-color: var(--btn-danger-border);
+}
+
+.btn.btn-red:hover,
+.btn.danger:hover {
+  background: var(--btn-danger-bg-hover);
+}
+
+.btn.btn-green,
+.btn.ok {
+  background: var(--btn-success-bg);
+  border-color: var(--btn-success-border);
+}
+
+.btn.btn-green:hover,
+.btn.ok:hover {
+  background: var(--btn-success-bg-hover);
+}

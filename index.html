@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Freezlet</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="ui/select.css" />
+    <link rel="stylesheet" href="ui/button.css" />
+    <link rel="stylesheet" href="ui/file-select.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>
+          Freezlet
+          <span class="pill" id="statusPill">No pack selected</span>
+        </h1>
+        <div class="row">
+          <span class="pill" id="pagePill">Page: setup</span>
+          <span class="pill" id="countPill">Words: 0</span>
+          <span class="pill" id="modePill">Mode: Test</span>
+          <span class="pill" id="dirPill">Direction: to ES</span>
+        </div>
+      </header>
+
+      <section class="page" id="setupPage">
+        <section class="panel">
+          <h2>Setup</h2>
+
+          <div class="feedback" id="setupFeedback">
+            <span class="muted">Add or choose a pack, then start the lesson.</span>
+          </div>
+
+          <div class="row start-action">
+            <button class="btn btn-green btn-big" id="startLessonBtn" disabled>Start lesson</button>
+          </div>
+
+          <div class="row" style="justify-content: space-between">
+            <label for="fileInput" class="section-title">Add pack (JSON)</label>
+          </div>
+          <input id="fileInput" type="file" accept=".json,application/json" class="file-hidden" />
+          <div class="row">
+            <button class="btn btn-neutral file-select-trigger" id="uploadFileBtn" type="button">Upload JSON</button>
+          </div>
+
+          <div class="vspace-12"></div>
+
+          <div class="row" style="justify-content: space-between">
+            <label for="templateSelect" class="section-title">Add from template</label>
+            <span class="small">Built-in starter packs</span>
+          </div>
+          <div class="row">
+            <div style="flex: 1; min-width: 180px">
+              <select id="templateSelect" aria-label="Choose template"></select>
+            </div>
+            <button class="btn btn-neutral" id="addTemplateBtn">Add template</button>
+          </div>
+
+          <div class="vspace-12"></div>
+
+          <div class="row" style="justify-content: space-between">
+            <label class="section-title">Word packs</label>
+            <div class="row">
+              <span class="small">Saved in this browser</span>
+              <button class="btn btn-red" id="clearPacksBtn">Remove all packs</button>
+            </div>
+          </div>
+          <div class="packList" id="packList"></div>
+
+          <div class="vspace-12"></div>
+
+          <div class="row">
+            <div style="flex: 1; min-width: 160px">
+              <label for="taskMode" class="section-title">Task mode</label>
+              <select id="taskMode">
+                <option value="softLesson" selected>Soft lesson</option>
+                <option value="lesson">Lesson</option>
+                <option value="typeAnswer">Type Answer</option>
+                <option value="test">Test</option>
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 160px">
+              <label for="direction" class="section-title">Translate</label>
+              <select id="direction">
+                <option value="toES" selected>to ES (ru → es)</option>
+                <option value="fromES">from ES (es → ru)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="vspace-12"></div>
+
+          <div class="row" style="justify-content: space-between">
+            <label for="themeSelect" class="section-title">Theme options</label>
+            <span class="small">Saved in this browser</span>
+          </div>
+          <div class="row">
+            <div style="flex: 1; min-width: 160px">
+              <select id="themeSelect">
+                <option value="quizlet-dark">Dark blue</option>
+                <option value="soft">Soft</option>
+              </select>
+            </div>
+          </div>
+
+          <details>
+            <summary>Example JSON</summary>
+            <pre id="exampleJson">
+[
+  {"id": 1, "ru": "хлеб", "es": "el pan"},
+  {"id": 2, "ru": "вода", "es": "el agua"},
+  {"id": 3, "ru": "кофе", "es": "el café"},
+  {"id": 4, "ru": "молоко", "es": "la leche"},
+  {"id": 5, "ru": "яблоко", "es": "la manzana"}
+]</pre
+            >
+            <div class="hint">Type Answer mode is strict: it checks <code>.trim().toLowerCase()</code> only.</div>
+          </details>
+
+          <details>
+            <summary>Active pack preview</summary>
+            <pre id="wordsPreview">(no pack selected)</pre>
+          </details>
+        </section>
+      </section>
+
+      <section class="page hidden" id="lessonPage" aria-live="polite">
+        <section class="task">
+          <div class="row" style="justify-content: space-between">
+            <button class="btn btn-green" id="backToSetupBtn">Back to setup</button>
+            <div class="row">
+              <span class="pill" id="lessonPackPill">Pack: —</span>
+              <span class="pill" id="lessonProgressPill">0 / 0</span>
+            </div>
+          </div>
+
+          <div class="feedback" id="lessonFeedback">
+            <span class="muted">Answer, skip, or reveal the current word.</span>
+          </div>
+
+          <div class="question">
+            <div class="q-meta">
+              <div id="progressText">Lesson has not started.</div>
+              <div class="muted" id="idText"></div>
+            </div>
+            <div class="q-prompt" id="prompt">—</div>
+            <div class="small" id="subprompt">Start a lesson from setup.</div>
+          </div>
+
+          <div id="testArea" style="display: none">
+            <div class="options" id="options"></div>
+          </div>
+
+          <div id="practiceArea" style="display: none">
+            <div class="practice">
+              <div>
+                <label for="answerInput">Your answer</label>
+                <input id="answerInput" type="text" placeholder="Type the exact translation" autocomplete="off" />
+              </div>
+              <button class="btn btn-green" id="checkBtn">Check</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-blue" id="skipBtn" disabled>Skip word</button>
+            <button class="btn btn-blue" id="revealBtn" disabled>Reveal</button>
+            <button class="btn btn-red" id="nextBtn" style="display: none" disabled>Next</button>
+          </div>
+
+          <div class="kpi four">
+            <div class="box">
+              <div class="small">Answered</div>
+              <div class="val" id="kAnswered">0</div>
+            </div>
+            <div class="box">
+              <div class="small">Correct</div>
+              <div class="val" id="kCorrect">0</div>
+            </div>
+            <div class="box">
+              <div class="small">Skipped</div>
+              <div class="val" id="kSkipped">0</div>
+            </div>
+            <div class="box">
+              <div class="small">Accuracy</div>
+              <div class="val" id="kAcc">0%</div>
+            </div>
+          </div>
+
+          <div class="miniCongrats hidden" id="chunkCongratsBox">
+            <strong id="chunkCongratsTitle">Small congrats!</strong>
+            <p id="chunkCongratsText">Chunk complete.</p>
+            <button class="btn btn-blue" id="continueChunkBtn">Continue</button>
+          </div>
+
+          <div class="congrats hidden" id="congratsBox">
+            <h2>Congrats!</h2>
+            <p id="congratsSummary">You completed the lesson.</p>
+            <div class="row">
+              <button class="btn btn-blue" id="replayLessonBtn">Do lesson again</button>
+              <button class="btn btn-neutral" id="goSetupBtn">Go to setup</button>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content: space-between">
+            <span class="small">Hotkeys: Enter = check/next, Shift+R = reveal answer.</span>
+            <span class="small" id="note"></span>
+          </div>
+        </section>
+      </section>
+    </div>
+    <script src="./dist/bundle.js"></script>
+  </body>
+</html>
