@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir -p site
           cp index.html styles.css site/
-          cp -R ui dist site/
+          cp -R src/ui dist site/
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site

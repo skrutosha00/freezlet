@@ -58,47 +58,51 @@
 }
 
 :root[data-theme="soft"] {
-  --bg-0: #181c2d;
-  --bg-1: #1f2234;
-  --surface-0: #272c43;
-  --surface-1: #303651;
-  --surface-2: #383e5d;
-  --surface-3: #404766;
-  --border-subtle: #78708f;
-  --border-strong: #958cb1;
-  --text-main: #f6f2ff;
-  --text-muted: #d0c8e3;
-  --text-faint: #b2a9c8;
-  --accent: #b09adf;
-  --accent-2: #9882cd;
-  --accent-soft: #5f5481;
-  --focus-color: #b09adf;
+  --bg-0: #1e1e1e;
+  --bg-1: #252526;
+  --surface-0: #252526;
+  --surface-1: #2d2d30;
+  --surface-2: #333337;
+  --surface-3: #3c3c3c;
+  --border-subtle: #3e3e42;
+  --border-strong: #5a5a5f;
+  --text-main: #d4d4d4;
+  --text-muted: #c5c5c5;
+  --text-faint: #9da0a6;
+  --accent: #3794ff;
+  --accent-2: #4da3ff;
+  --accent-soft: #094771;
+  --success: #4ec9b0;
+  --success-soft: #2c7f72;
+  --danger: #f48771;
+  --danger-soft: #8f4a3f;
+  --focus-color: #3794ff;
 
-  --control-bg: #272c43;
-  --control-bg-focus: #313856;
+  --control-bg: #252526;
+  --control-bg-focus: #2f3033;
   --control-border: var(--border-subtle);
-  --control-border-focus: var(--border-strong);
+  --control-border-focus: var(--accent);
   --control-text: var(--text-main);
 
-  --btn-neutral-bg: #5a5274;
-  --btn-neutral-bg-hover: #696080;
-  --btn-neutral-border: #8a80ab;
+  --btn-neutral-bg: #3c3c3c;
+  --btn-neutral-bg-hover: #4a4a4a;
+  --btn-neutral-border: #5a5a5f;
 
-  --btn-primary-bg: #8d76c3;
-  --btn-primary-bg-hover: #9f87d4;
-  --btn-primary-border: #b29adb;
+  --btn-primary-bg: #0e639c;
+  --btn-primary-bg-hover: #1177bb;
+  --btn-primary-border: #3794ff;
 
-  --btn-success-bg: #4f7f6c;
-  --btn-success-bg-hover: #5d927d;
-  --btn-success-border: #79b09a;
+  --btn-success-bg: #2d7d46;
+  --btn-success-bg-hover: #379955;
+  --btn-success-border: #4fb36a;
 
-  --btn-danger-bg: #946177;
-  --btn-danger-bg-hover: #a97389;
-  --btn-danger-border: #c192a6;
+  --btn-danger-bg: #8f2f2f;
+  --btn-danger-bg-hover: #a33a3a;
+  --btn-danger-border: #c45050;
 
-  --btn-file-bg: #725fa0;
-  --btn-file-bg-hover: #816eb0;
-  --btn-file-border: #9f8aca;
+  --btn-file-bg: #005a9e;
+  --btn-file-bg-hover: #0a6fc2;
+  --btn-file-border: #3794ff;
 }
 
 * {
@@ -116,7 +120,7 @@ body {
 }
 
 .wrap {
-  width: min(980px, 100%);
+  width: min(1020px, 100%);
   display: grid;
   gap: 16px;
   margin: 0 auto;
@@ -158,31 +162,18 @@ h1 {
   align-items: center;
 }
 
-.panel,
-.task {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-}
-
-.panel {
-  background: var(--surface-1);
-}
-
 .task {
   min-height: 420px;
   display: grid;
   gap: 12px;
-  background: var(--surface-2);
 }
 
 .panel h2,
 .congrats h2 {
-  font-size: 13px;
-  margin: 0 0 10px;
-  color: var(--text-faint);
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .row {
@@ -197,13 +188,13 @@ h1 {
   margin: 24px 0;
 }
 
-.vspace-12 {
-  height: 12px;
+.vspace-16 {
+  height: 16px;
 }
 
 label {
   display: inline-block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-size: 13px;
   color: var(--text-muted);
 }
@@ -222,6 +213,7 @@ input[type="text"] {
   padding: 10px 12px;
   border-radius: 8px;
   outline: none;
+  min-height: 39px;
 }
 
 input[type="text"] {
@@ -294,6 +286,7 @@ input[type="text"]:focus {
 
 .options .btn {
   font-weight: 400;
+  font-size: 18px;
 }
 
 .options {

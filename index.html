@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Freezlet</title>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="ui/select.css" />
-    <link rel="stylesheet" href="ui/button.css" />
-    <link rel="stylesheet" href="ui/file-select.css" />
+    <link rel="stylesheet" href="src/ui/select.css" />
+    <link rel="stylesheet" href="src/ui/button.css" />
+    <link rel="stylesheet" href="src/ui/file-select.css" />
   </head>
   <body>
     <div class="wrap">
@@ -44,7 +44,7 @@
             <button class="btn btn-neutral file-select-trigger" id="uploadFileBtn" type="button">Upload JSON</button>
           </div>
 
-          <div class="vspace-12"></div>
+          <div class="vspace-16"></div>
 
           <div class="row" style="justify-content: space-between">
             <label for="templateSelect" class="section-title">Add from template</label>
@@ -54,10 +54,10 @@
             <div style="flex: 1; min-width: 180px">
               <select id="templateSelect" aria-label="Choose template"></select>
             </div>
-            <button class="btn btn-neutral" id="addTemplateBtn">Add template</button>
+            <button class="btn btn-blue" id="addTemplateBtn">Add template</button>
           </div>
 
-          <div class="vspace-12"></div>
+          <div class="vspace-16"></div>
 
           <div class="row" style="justify-content: space-between">
             <label class="section-title">Word packs</label>
@@ -68,7 +68,7 @@
           </div>
           <div class="packList" id="packList"></div>
 
-          <div class="vspace-12"></div>
+          <div class="vspace-16"></div>
 
           <div class="row">
             <div style="flex: 1; min-width: 160px">
@@ -89,7 +89,7 @@
             </div>
           </div>
 
-          <div class="vspace-12"></div>
+          <div class="vspace-16"></div>
 
           <div class="row" style="justify-content: space-between">
             <label for="themeSelect" class="section-title">Theme options</label>
@@ -203,7 +203,7 @@
           </div>
 
           <div class="row" style="justify-content: space-between">
-            <span class="small">Hotkeys: Enter = check/next, Shift+R = reveal answer.</span>
+            <span class="small">Hotkeys: Enter = check/next.</span>
             <span class="small" id="note"></span>
           </div>
         </section>

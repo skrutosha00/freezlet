@@ -1,10 +1,10 @@
-import BUILT_IN_TEMPLATES from "./constants/templates.js";
-import escapeHtml from "./utils/escapeHtml.js";
-import lsReadJSON from "./utils/lsReadJSON.js";
-import lsWriteJSON from "./utils/lsWriteJSON.js";
-import normalize from "./utils/normalize.js";
-import shuffle from "./utils/shuffle.js";
-import uid from "./utils/uid.js";
+import BUILT_IN_TEMPLATES from "./src/constants/templates.js";
+import escapeHtml from "./src/utils/escapeHtml.js";
+import lsReadJSON from "./src/utils/lsReadJSON.js";
+import lsWriteJSON from "./src/utils/lsWriteJSON.js";
+import normalize from "./src/utils/normalize.js";
+import shuffle from "./src/utils/shuffle.js";
+import uid from "./src/utils/uid.js";
 
 // --------- LocalStorage ---------
 const LS = {
@@ -1195,15 +1195,6 @@ els.continueChunkBtn.addEventListener("click", continueChunkFlow);
 // Hotkeys
 window.addEventListener("keydown", (e) => {
   if (state.page !== "lesson" || state.lesson.done) return;
-
-  const key = e.key.toLowerCase();
-
-  const isRevealCombo = key === "r" && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey;
-  if (isRevealCombo) {
-    e.preventDefault();
-    if (!els.revealBtn.disabled) revealAnswer();
-    return;
-  }
 
   if (e.key === "Enter") {
     if (state.lesson.chunk.awaitingContinue && isChunkLessonMode()) {
