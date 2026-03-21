@@ -6,6 +6,11 @@ import unit3CTemplate from "../templates/3c.js";
 import unit3DTemplate from "../templates/3d.js";
 import unit3ETemplate from "../templates/3e.js";
 import unit3FTemplate from "../templates/3f.js";
+import unit4ATemplate from "../templates/4a.js";
+import unit4BTemplate from "../templates/4b.js";
+import unit4CTemplate from "../templates/4c.js";
+import unit4DTemplate from "../templates/4d.js";
+import laFalsaFacilidadTemplate from "../templates/laFalsaFacilidad.js";
 import slugify from "../utils/slugify.js";
 import uid from "../utils/uid.js";
 
@@ -17,7 +22,12 @@ const BUILT_IN_TEMPLATES = [
   unit3CTemplate,
   unit3DTemplate,
   unit3ETemplate,
-  unit3FTemplate
+  unit3FTemplate,
+  unit4ATemplate,
+  unit4BTemplate,
+  unit4CTemplate,
+  unit4DTemplate,
+  laFalsaFacilidadTemplate
 ]
   .filter((t) => t && typeof t === "object")
   .map((t) => ({

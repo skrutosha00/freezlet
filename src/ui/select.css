@@ -1,15 +1,31 @@
 select {
+  -webkit-appearance: none;
+  appearance: none;
   border: 1px solid var(--control-border);
-  background: var(--control-bg);
+  background-color: var(--control-bg);
   color: var(--control-text);
+  font: inherit;
+  line-height: 1.2;
+  min-height: var(--control-height);
+  height: var(--control-height);
+  padding-right: 40px;
+  -webkit-text-size-adjust: 100%;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 1px),
+    calc(100% - 12px) calc(50% - 1px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
   transition:
     border-color 140ms ease,
-    background 140ms ease;
+    background-color 140ms ease;
 }
 
 select:focus {
   border-color: var(--control-border-focus);
-  background: var(--control-bg-focus);
+  background-color: var(--control-bg-focus);
   outline: 2px solid var(--focus-color);
   outline-offset: 0;
 }
