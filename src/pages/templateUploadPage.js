@@ -1,4 +1,5 @@
 import escapeHtml from "../utils/escapeHtml.js";
+import { createFirebaseTemplate } from "../services/firebaseTemplates.js";
 
 function sanitizeWordsArray(words) {
   if (!Array.isArray(words)) return [];
@@ -136,7 +137,6 @@ export default function initTemplateUploadPage({
     });
 
     try {
-      const { createFirebaseTemplate } = await import("../services/firebaseTemplates.js");
       const createdTemplate = await createFirebaseTemplate(template);
       setFeedback(templateUploadFeedback, {
         type: "ok",

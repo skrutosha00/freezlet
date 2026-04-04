@@ -1,5 +1,6 @@
 import BUILT_IN_TEMPLATES from "./src/constants/templates.js";
 import initTemplateUploadPage from "./src/pages/templateUploadPage.js";
+import { fetchFirebaseTemplates } from "./src/services/firebaseTemplates.js";
 import escapeHtml from "./src/utils/escapeHtml.js";
 import lsReadJSON from "./src/utils/lsReadJSON.js";
 import lsWriteJSON from "./src/utils/lsWriteJSON.js";
@@ -1009,7 +1010,6 @@ function getAvailableTemplates() {
 
 async function loadFirebaseTemplates() {
   try {
-    const { fetchFirebaseTemplates } = await import("./src/services/firebaseTemplates.js");
     const templates = await fetchFirebaseTemplates();
     state.firebaseTemplates = templates;
     state.firebaseTemplatesLoaded = true;
