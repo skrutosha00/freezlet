@@ -164,6 +164,33 @@ h1 {
   align-items: center;
 }
 
+#templateUploadPage:not(.hidden) {
+  display: block;
+}
+
+#templateUploadPage .panel {
+  display: grid;
+  gap: 18px;
+}
+
+#templateUploadPage .panel > * {
+  margin: 0;
+}
+
+#templateUploadPage .feedback {
+  margin-top: -2px;
+}
+
+#templateUploadPage .row {
+  row-gap: 12px;
+}
+
+#templateUploadPage details {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .task {
   min-height: 420px;
   display: grid;
@@ -190,6 +217,10 @@ h1 {
   margin: 24px 0;
 }
 
+.row.setup-upload-action {
+  margin-top: 10px;
+}
+
 .vspace-16 {
   height: 16px;
 }
@@ -210,7 +241,8 @@ label.section-title {
 }
 
 select,
-input[type="text"] {
+input[type="text"],
+textarea {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -220,12 +252,14 @@ input[type="text"] {
 
 @media (pointer: coarse) {
   select,
-  input[type="text"] {
+  input[type="text"],
+  textarea {
     font-size: 16px;
   }
 }
 
-input[type="text"] {
+input[type="text"],
+textarea {
   border: 1px solid var(--control-border);
   background: var(--control-bg);
   color: var(--control-text);
@@ -234,11 +268,28 @@ input[type="text"] {
     background 140ms ease;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+textarea:focus {
   border-color: var(--control-border-focus);
   background: var(--control-bg-focus);
   outline: 2px solid var(--focus-color);
   outline-offset: 0;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 260px;
+  font: inherit;
+  line-height: 1.45;
+}
+
+textarea::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+#templateJsonInput::placeholder {
+  color: #c7cff5;
 }
 
 #answerInput {

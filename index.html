@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="src/ui/select.css" />
     <link rel="stylesheet" href="src/ui/button.css" />
-    <link rel="stylesheet" href="src/ui/file-select.css" />
   </head>
   <body>
     <div class="wrap">
@@ -32,19 +31,13 @@
             <span class="muted">Add or choose a pack, then start the lesson.</span>
           </div>
 
+          <div class="row setup-upload-action" style="justify-content: flex-end">
+            <button class="btn btn-blue" id="openTemplateUploadPageBtn" type="button">Upload template</button>
+          </div>
+
           <div class="row start-action">
             <button class="btn btn-green btn-big" id="startLessonBtn" disabled>Start lesson</button>
           </div>
-
-          <div class="row" style="justify-content: space-between">
-            <label for="fileInput" class="section-title">Add pack (JSON)</label>
-          </div>
-          <input id="fileInput" type="file" accept=".json,application/json" class="file-hidden" />
-          <div class="row">
-            <button class="btn btn-neutral file-select-trigger" id="uploadFileBtn" type="button">Upload JSON</button>
-          </div>
-
-          <div class="vspace-16"></div>
 
           <div class="row" style="justify-content: space-between">
             <label for="templateSelect" class="section-title">Add from template</label>
@@ -76,6 +69,7 @@
               <select id="taskMode">
                 <option value="softLesson" selected>Soft lesson</option>
                 <option value="lesson">Lesson</option>
+                <option value="straightLesson">Straight Lesson</option>
                 <option value="typeAnswer">Type Answer</option>
                 <option value="test">Test</option>
               </select>
@@ -103,20 +97,6 @@
               </select>
             </div>
           </div>
-
-          <details>
-            <summary>Example JSON</summary>
-            <pre id="exampleJson">
-[
-  {"id": 1, "ru": "хлеб", "es": "el pan"},
-  {"id": 2, "ru": "вода", "es": "el agua"},
-  {"id": 3, "ru": "кофе", "es": "el café"},
-  {"id": 4, "ru": "молоко", "es": "la leche"},
-  {"id": 5, "ru": "яблоко", "es": "la manzana"}
-]</pre
-            >
-            <div class="hint">Type Answer mode is strict: it checks <code>.trim().toLowerCase()</code> only.</div>
-          </details>
 
           <details>
             <summary>Active pack preview</summary>
@@ -206,6 +186,49 @@
             <span class="small">Hotkeys: Enter = check/next.</span>
             <span class="small" id="note"></span>
           </div>
+        </section>
+      </section>
+
+      <section class="page hidden" id="templateUploadPage">
+        <section class="panel">
+          <div class="row" style="justify-content: space-between">
+            <h2>Upload Template</h2>
+            <button class="btn btn-neutral" id="backFromTemplateUploadBtn" type="button">Back to setup</button>
+          </div>
+
+          <div class="feedback" id="templateUploadFeedback">
+            <span class="muted">Paste template JSON and upload it to Firebase.</span>
+          </div>
+
+          <div>
+            <label for="templateJsonInput" class="section-title">Template JSON</label>
+            <textarea
+              id="templateJsonInput"
+              rows="16"
+              placeholder='{
+  "name": "My template",
+  "words": [
+    {"id": 1, "ru": "дом", "es": "la casa"}
+  ]
+}'
+            ></textarea>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-blue" id="validateTemplateJsonBtn" type="button">Validate JSON</button>
+            <button class="btn btn-green" id="submitTemplateJsonBtn" type="button">Upload to Firebase</button>
+          </div>
+
+          <details>
+            <summary>Expected JSON format</summary>
+            <pre id="templateUploadExampleJson">{
+  "name": "My template",
+  "words": [
+    {"id": 1, "ru": "дом", "es": "la casa"},
+    {"id": 2, "ru": "вода", "es": "el agua"}
+  ]
+}</pre>
+          </details>
         </section>
       </section>
     </div>

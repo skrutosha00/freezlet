@@ -1,4 +1,5 @@
 import BUILT_IN_TEMPLATES from "./src/constants/templates.js";
+import initTemplateUploadPage from "./src/pages/templateUploadPage.js";
 import escapeHtml from "./src/utils/escapeHtml.js";
 import lsReadJSON from "./src/utils/lsReadJSON.js";
 import lsWriteJSON from "./src/utils/lsWriteJSON.js";
@@ -26,9 +27,9 @@ let autoNextTimerId = null;
 const els = {
   setupPage: document.getElementById("setupPage"),
   lessonPage: document.getElementById("lessonPage"),
+  templateUploadPage: document.getElementById("templateUploadPage"),
 
-  fileInput: document.getElementById("fileInput"),
-  uploadFileBtn: document.getElementById("uploadFileBtn"),
+  openTemplateUploadPageBtn: document.getElementById("openTemplateUploadPageBtn"),
   templateSelect: document.getElementById("templateSelect"),
   addTemplateBtn: document.getElementById("addTemplateBtn"),
   clearPacksBtn: document.getElementById("clearPacksBtn"),
@@ -39,6 +40,7 @@ const els = {
   themeSelect: document.getElementById("themeSelect"),
   startLessonBtn: document.getElementById("startLessonBtn"),
   backToSetupBtn: document.getElementById("backToSetupBtn"),
+  backFromTemplateUploadBtn: document.getElementById("backFromTemplateUploadBtn"),
   replayLessonBtn: document.getElementById("replayLessonBtn"),
   goSetupBtn: document.getElementById("goSetupBtn"),
 
@@ -69,7 +71,11 @@ const els = {
 
   setupFeedback: document.getElementById("setupFeedback"),
   lessonFeedback: document.getElementById("lessonFeedback"),
+  templateUploadFeedback: document.getElementById("templateUploadFeedback"),
   note: document.getElementById("note"),
+  templateJsonInput: document.getElementById("templateJsonInput"),
+  validateTemplateJsonBtn: document.getElementById("validateTemplateJsonBtn"),
+  submitTemplateJsonBtn: document.getElementById("submitTemplateJsonBtn"),
 
   chunkCongratsBox: document.getElementById("chunkCongratsBox"),
   chunkCongratsTitle: document.getElementById("chunkCongratsTitle"),
@@ -93,9 +99,12 @@ const state = {
   activePackId: null,
 
   words: [], // currently selected pack words
-  mode: "softLesson", // 'test' | 'typeAnswer' | 'lesson' | 'softLesson'
+  mode: "softLesson", // 'test' | 'typeAnswer' | 'lesson' | 'straightLesson' | 'softLesson'
   dir: "toES", // 'toES' | 'fromES'
-  page: "setup", // 'setup' | 'lesson'
+  page: "setup", // 'setup' | 'lesson' | 'templateUpload'
+  firebaseTemplates: [],
+  firebaseTemplatesLoaded: false,
+  firebaseTemplatesError: null,
 
   lesson: {
     queue: [],
@@ -125,13 +134,14 @@ function getModeLabel(mode) {
   if (mode === "test") return "Test";
   if (mode === "typeAnswer") return "Type Answer";
   if (mode === "lesson") return "Lesson";
+  if (mode === "straightLesson") return "Straight Lesson";
   if (mode === "softLesson") return "Soft lesson";
   return mode;
 }
 
 function getCurrentAnswerMode() {
   if (state.mode === "softLesson") return state.lesson.chunk.phase;
-  if (state.mode === "lesson") return "typeAnswer";
+  if (state.mode === "lesson" || state.mode === "straightLesson") return "typeAnswer";
   return state.mode;
 }
 
@@ -202,6 +212,7 @@ function setPage(page) {
   state.page = page;
   els.setupPage.classList.toggle("hidden", page !== "setup");
   els.lessonPage.classList.toggle("hidden", page !== "lesson");
+  els.templateUploadPage.classList.toggle("hidden", page !== "templateUpload");
   updatePills();
 }
 
@@ -390,8 +401,19 @@ function renderPackList() {
 function renderTemplateSelect() {
   const selectedBefore = els.templateSelect.value;
   els.templateSelect.innerHTML = "";
+  const templates = getAvailableTemplates();
 
-  if (!BUILT_IN_TEMPLATES.length) {
+  if (!state.firebaseTemplatesLoaded && state.firebaseTemplatesError == null) {
+    const loading = document.createElement("option");
+    loading.value = "";
+    loading.textContent = "Loading templates from Firebase…";
+    els.templateSelect.appendChild(loading);
+    els.templateSelect.disabled = true;
+    els.addTemplateBtn.disabled = true;
+    return;
+  }
+
+  if (!templates.length) {
     const empty = document.createElement("option");
     empty.value = "";
     empty.textContent = "No templates available";
@@ -401,7 +423,7 @@ function renderTemplateSelect() {
     return;
   }
 
-  for (const tpl of BUILT_IN_TEMPLATES) {
+  for (const tpl of templates) {
     const opt = document.createElement("option");
     opt.value = tpl.templateId;
     opt.textContent = `${tpl.name} (${tpl.words.length} words)`;
@@ -583,11 +605,15 @@ function closeChunkCongrats() {
 }
 
 function isChunkLessonMode() {
-  return state.mode === "lesson" || state.mode === "softLesson";
+  return state.mode === "lesson" || state.mode === "straightLesson" || state.mode === "softLesson";
 }
 
 function isSoftLessonMode() {
   return state.mode === "softLesson";
+}
+
+function isStraightLessonMode() {
+  return state.mode === "straightLesson";
 }
 
 function pickDistinct(pool, n, excludeWord) {
@@ -911,8 +937,8 @@ function startLesson() {
   resetLessonState();
 
   if (isChunkLessonMode()) {
-    const shuffled = shuffle(state.words);
-    state.lesson.chunk.chunks = splitIntoChunks(shuffled, state.lesson.chunk.chunkSize);
+    const orderedWords = isStraightLessonMode() ? [...state.words] : shuffle(state.words);
+    state.lesson.chunk.chunks = splitIntoChunks(orderedWords, state.lesson.chunk.chunkSize);
     state.lesson.chunk.chunkIndex = 0;
     state.lesson.chunk.phase = isSoftLessonMode() ? "test" : "typeAnswer";
     state.lesson.chunk.inRetryPass = false;
@@ -939,33 +965,13 @@ function backToSetup() {
   });
 }
 
-// --------- JSON parsing / validation ---------
-function tryParseWords(jsonText) {
-  const parsed = JSON.parse(jsonText);
-  const arr = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.words) ? parsed.words : null;
-  if (!arr) throw new Error("JSON must be an array or { words: [...] }");
+function goToSetupPage() {
+  setPage("setup");
+  showModeAreas();
+}
 
-  const cleaned = arr
-    .filter((x) => x && typeof x === "object")
-    .map((x, idx) => ({
-      id: x.id ?? idx + 1,
-      ru: String(x.ru ?? "").trim(),
-      es: String(x.es ?? "").trim()
-    }))
-    .filter((x) => x.ru && x.es);
-
-  if (!cleaned.length) throw new Error("No valid items found. Each item should have ru and es.");
-
-  const seen = new Set();
-  const unique = [];
-  for (const w of cleaned) {
-    const key = `${w.ru}|||${w.es}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    unique.push(w);
-  }
-
-  return unique;
+function openTemplateUploadPage() {
+  setPage("templateUpload");
 }
 
 function sanitizeWordsArray(words) {
@@ -990,24 +996,35 @@ function sanitizeWordsArray(words) {
   return unique;
 }
 
-function loadWordsFromFile(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        resolve(tryParseWords(String(reader.result ?? "")));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsText(file);
-  });
-}
-
 function getSelectedTemplate() {
   const selectedId = els.templateSelect.value;
-  return BUILT_IN_TEMPLATES.find((tpl) => tpl.templateId === selectedId) || null;
+  return getAvailableTemplates().find((tpl) => tpl.templateId === selectedId) || null;
+}
+
+function getAvailableTemplates() {
+  if (state.firebaseTemplatesError != null) return BUILT_IN_TEMPLATES;
+  if (state.firebaseTemplatesLoaded) return state.firebaseTemplates;
+  return [];
+}
+
+async function loadFirebaseTemplates() {
+  try {
+    const { fetchFirebaseTemplates } = await import("./src/services/firebaseTemplates.js");
+    const templates = await fetchFirebaseTemplates();
+    state.firebaseTemplates = templates;
+    state.firebaseTemplatesLoaded = true;
+    state.firebaseTemplatesError = null;
+    console.info("[firebase] Templates from /templates:", templates);
+    renderTemplateSelect();
+  } catch (err) {
+    const firebaseError = err instanceof Error ? err : new Error(String(err ?? "Unknown Firebase templates error"));
+    state.firebaseTemplates = [];
+    state.firebaseTemplatesLoaded = true;
+    state.firebaseTemplatesError = firebaseError;
+    console.error("[firebase] Failed to load templates from /templates.", firebaseError);
+    console.info("[firebase] Falling back to local templates:", BUILT_IN_TEMPLATES);
+    renderTemplateSelect();
+  }
 }
 
 // --------- Init / Restore ---------
@@ -1089,36 +1106,6 @@ function restoreTheme() {
 }
 
 // --------- Events ---------
-els.uploadFileBtn.addEventListener("click", () => {
-  els.fileInput.click();
-});
-
-els.fileInput.addEventListener("change", async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  setSetupFeedback({ type: "neutral", html: '<span class="muted">Reading file…</span>' });
-
-  try {
-    const words = await loadWordsFromFile(file);
-
-    const base = file.name.replace(/\.json$/i, "");
-    const newPack = addPackFromWords(words, base || file.name);
-    setSetupFeedback({
-      type: "ok",
-      html: `✅ <strong>Added</strong> pack “${escapeHtml(newPack.name)}” (${newPack.words.length} words). Start lesson when ready.`
-    });
-  } catch (err) {
-    console.error(err);
-    setSetupFeedback({
-      type: "bad",
-      html: `⚠️ <strong>JSON error</strong>: <span class="muted">${escapeHtml(err?.message || String(err))}</span>`
-    });
-  } finally {
-    els.fileInput.value = "";
-  }
-});
-
 els.addTemplateBtn.addEventListener("click", () => {
   const tpl = getSelectedTemplate();
   if (!tpl) {
@@ -1178,9 +1165,9 @@ if (els.themeSelect) {
   });
 }
 
-els.startLessonBtn.addEventListener("click", startLesson);
 els.backToSetupBtn.addEventListener("click", backToSetup);
 els.goSetupBtn.addEventListener("click", backToSetup);
+els.startLessonBtn.addEventListener("click", startLesson);
 els.replayLessonBtn.addEventListener("click", startLesson);
 
 els.skipBtn.addEventListener("click", skipWord);
@@ -1218,6 +1205,22 @@ window.addEventListener("keydown", (e) => {
 });
 
 // Initial
+initTemplateUploadPage({
+  elements: els,
+  goToSetupPage,
+  goToTemplateUploadPage: openTemplateUploadPage,
+  onTemplateUploaded: (template) => {
+    state.firebaseTemplatesError = null;
+    state.firebaseTemplatesLoaded = true;
+    state.firebaseTemplates = [
+      ...state.firebaseTemplates.filter((item) => item.templateId !== template.templateId),
+      template
+    ];
+    renderTemplateSelect();
+    void loadFirebaseTemplates();
+  }
+});
+
 renderTemplateSelect();
 restoreTheme();
 updatePills();
@@ -1227,3 +1230,4 @@ setPage("setup");
 updateSetupActions();
 resetLessonState();
 restoreFromStorage();
+void loadFirebaseTemplates();
