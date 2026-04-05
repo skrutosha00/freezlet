@@ -32,6 +32,7 @@
           </div>
 
           <div class="row setup-upload-action" style="justify-content: flex-end">
+            <button class="btn btn-blue" id="openChatPageBtn" type="button">Go to chat</button>
             <button class="btn btn-blue" id="openTemplateUploadPageBtn" type="button">Upload template</button>
           </div>
 
@@ -145,7 +146,12 @@
           <div class="row">
             <button class="btn btn-blue" id="skipBtn" disabled>Skip word</button>
             <button class="btn btn-blue" id="revealBtn" disabled>Reveal</button>
+            <button class="btn btn-blue" id="showExamplesBtn" disabled>Show examples</button>
             <button class="btn btn-red" id="nextBtn" style="display: none" disabled>Next</button>
+          </div>
+
+          <div class="feedback exampleResponse hidden" id="exampleResponseBox">
+            <span class="feedback-line" id="exampleResponseText"></span>
           </div>
 
           <div class="kpi four">
@@ -210,8 +216,7 @@
   "words": [
     {"id": 1, "ru": "дом", "es": "la casa"}
   ]
-}'
-            ></textarea>
+}'></textarea>
           </div>
 
           <div class="row">
@@ -221,14 +226,44 @@
 
           <details>
             <summary>Expected JSON format</summary>
-            <pre id="templateUploadExampleJson">{
+            <pre id="templateUploadExampleJson">
+{
   "name": "My template",
   "words": [
     {"id": 1, "ru": "дом", "es": "la casa"},
     {"id": 2, "ru": "вода", "es": "el agua"}
   ]
-}</pre>
+}</pre
+            >
           </details>
+        </section>
+      </section>
+
+      <section class="page hidden" id="chatPage">
+        <section class="panel">
+          <div class="row" style="justify-content: space-between">
+            <h2>Chat</h2>
+            <button class="btn btn-neutral" id="backFromChatPageBtn" type="button">Back to setup</button>
+          </div>
+
+          <div class="feedback" id="chatPageFeedback">
+            <span class="muted">Connect your ChatGPT API settings here. Message flow will be added later.</span>
+          </div>
+
+          <div>
+            <label for="chatApiKeyInput" class="section-title">API key</label>
+            <input
+              id="chatApiKeyInput"
+              type="password"
+              placeholder="Paste your key"
+              autocomplete="off"
+              spellcheck="false" />
+          </div>
+
+          <div>
+            <label for="chatModelSelect" class="section-title">Model</label>
+            <select id="chatModelSelect" aria-label="Choose chat model"></select>
+          </div>
         </section>
       </section>
     </div>

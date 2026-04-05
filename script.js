@@ -1,5 +1,8 @@
 import BUILT_IN_TEMPLATES from "./src/constants/templates.js";
+import initChatPage from "./src/pages/chatPage.js";
 import initTemplateUploadPage from "./src/pages/templateUploadPage.js";
+import { askGpt } from "./src/services/exampleGenerator.js";
+import { buildExampleMessages } from "./src/services/examplePrompts.js";
 import { fetchFirebaseTemplates } from "./src/services/firebaseTemplates.js";
 import escapeHtml from "./src/utils/escapeHtml.js";
 import lsReadJSON from "./src/utils/lsReadJSON.js";
@@ -29,7 +32,9 @@ const els = {
   setupPage: document.getElementById("setupPage"),
   lessonPage: document.getElementById("lessonPage"),
   templateUploadPage: document.getElementById("templateUploadPage"),
+  chatPage: document.getElementById("chatPage"),
 
+  openChatPageBtn: document.getElementById("openChatPageBtn"),
   openTemplateUploadPageBtn: document.getElementById("openTemplateUploadPageBtn"),
   templateSelect: document.getElementById("templateSelect"),
   addTemplateBtn: document.getElementById("addTemplateBtn"),
@@ -42,11 +47,13 @@ const els = {
   startLessonBtn: document.getElementById("startLessonBtn"),
   backToSetupBtn: document.getElementById("backToSetupBtn"),
   backFromTemplateUploadBtn: document.getElementById("backFromTemplateUploadBtn"),
+  backFromChatPageBtn: document.getElementById("backFromChatPageBtn"),
   replayLessonBtn: document.getElementById("replayLessonBtn"),
   goSetupBtn: document.getElementById("goSetupBtn"),
 
   skipBtn: document.getElementById("skipBtn"),
   revealBtn: document.getElementById("revealBtn"),
+  showExamplesBtn: document.getElementById("showExamplesBtn"),
   nextBtn: document.getElementById("nextBtn"),
 
   statusPill: document.getElementById("statusPill"),
@@ -72,11 +79,16 @@ const els = {
 
   setupFeedback: document.getElementById("setupFeedback"),
   lessonFeedback: document.getElementById("lessonFeedback"),
+  exampleResponseBox: document.getElementById("exampleResponseBox"),
+  exampleResponseText: document.getElementById("exampleResponseText"),
   templateUploadFeedback: document.getElementById("templateUploadFeedback"),
+  chatPageFeedback: document.getElementById("chatPageFeedback"),
   note: document.getElementById("note"),
   templateJsonInput: document.getElementById("templateJsonInput"),
   validateTemplateJsonBtn: document.getElementById("validateTemplateJsonBtn"),
   submitTemplateJsonBtn: document.getElementById("submitTemplateJsonBtn"),
+  chatApiKeyInput: document.getElementById("chatApiKeyInput"),
+  chatModelSelect: document.getElementById("chatModelSelect"),
 
   chunkCongratsBox: document.getElementById("chunkCongratsBox"),
   chunkCongratsTitle: document.getElementById("chunkCongratsTitle"),
@@ -102,7 +114,7 @@ const state = {
   words: [], // currently selected pack words
   mode: "softLesson", // 'test' | 'typeAnswer' | 'lesson' | 'straightLesson' | 'softLesson'
   dir: "toES", // 'toES' | 'fromES'
-  page: "setup", // 'setup' | 'lesson' | 'templateUpload'
+  page: "setup", // 'setup' | 'lesson' | 'templateUpload' | 'chat'
   firebaseTemplates: [],
   firebaseTemplatesLoaded: false,
   firebaseTemplatesError: null,
@@ -110,6 +122,9 @@ const state = {
   lesson: {
     queue: [],
     cursor: 0,
+    exampleRequestId: 0,
+    examplesLoading: false,
+    exampleResponse: "",
     answeredCurrent: false,
     manualNextPending: false,
     done: false,
@@ -214,6 +229,7 @@ function setPage(page) {
   els.setupPage.classList.toggle("hidden", page !== "setup");
   els.lessonPage.classList.toggle("hidden", page !== "lesson");
   els.templateUploadPage.classList.toggle("hidden", page !== "templateUpload");
+  els.chatPage.classList.toggle("hidden", page !== "chat");
   updatePills();
 }
 
@@ -243,6 +259,9 @@ function resetLessonState() {
   clearAutoNextTimer();
   state.lesson.queue = [];
   state.lesson.cursor = 0;
+  state.lesson.exampleRequestId = 0;
+  state.lesson.examplesLoading = false;
+  state.lesson.exampleResponse = "";
   state.lesson.answeredCurrent = false;
   state.lesson.manualNextPending = false;
   state.lesson.done = false;
@@ -262,6 +281,8 @@ function resetLessonState() {
 
   updateLessonStatsUI();
   updateLessonTopRow();
+  updateShowExamplesButton();
+  renderExampleResponse();
 }
 
 function updateLessonTopRow() {
@@ -307,6 +328,18 @@ function updateLessonStatsUI() {
 function setLessonControlsEnabled({ skip, reveal } = {}) {
   els.skipBtn.disabled = !skip;
   els.revealBtn.disabled = !reveal;
+}
+
+function renderExampleResponse() {
+  const text = String(state.lesson.exampleResponse || "").trim();
+  els.exampleResponseBox.classList.toggle("hidden", !text);
+  els.exampleResponseText.textContent = text;
+}
+
+function updateShowExamplesButton() {
+  const word = getCurrentWord();
+  els.showExamplesBtn.textContent = state.lesson.examplesLoading ? "Loading..." : "Show examples";
+  els.showExamplesBtn.disabled = !word || state.lesson.done || state.lesson.examplesLoading;
 }
 
 function ensureUniquePackName(baseName) {
@@ -669,6 +702,9 @@ function renderLessonWord() {
 
   closeChunkCongrats();
   state.lesson.answeredCurrent = false;
+  state.lesson.exampleRequestId += 1;
+  state.lesson.examplesLoading = false;
+  state.lesson.exampleResponse = "";
 
   const total = state.lesson.queue.length;
   const pos = state.lesson.cursor + 1;
@@ -676,6 +712,8 @@ function renderLessonWord() {
   const answerMode = getCurrentAnswerMode();
 
   updateLessonTopRow();
+  updateShowExamplesButton();
+  renderExampleResponse();
   showModeAreas();
   els.congratsBox.classList.add("hidden");
 
@@ -785,6 +823,34 @@ function revealAnswer() {
 
   const { answer } = getQA(word);
   setLessonFeedback({ type: "neutral", html: `👀 <strong>Answer</strong>: <strong>${escapeHtml(answer)}</strong>` });
+}
+
+async function showExamples() {
+  const word = getCurrentWord();
+  if (!word || state.lesson.done || state.lesson.examplesLoading) return;
+
+  const requestId = state.lesson.exampleRequestId + 1;
+  state.lesson.exampleRequestId = requestId;
+  state.lesson.examplesLoading = true;
+  state.lesson.exampleResponse = "";
+  updateShowExamplesButton();
+  renderExampleResponse();
+
+  try {
+    const responseText = await askGpt(buildExampleMessages(word));
+    if (state.lesson.exampleRequestId !== requestId) return;
+    state.lesson.exampleResponse = responseText;
+    console.log(responseText);
+  } catch (err) {
+    if (state.lesson.exampleRequestId !== requestId) return;
+    state.lesson.exampleResponse = "Failed to load example.";
+    console.error("[examples] Failed to generate example sentence.", err);
+  } finally {
+    if (state.lesson.exampleRequestId !== requestId) return;
+    state.lesson.examplesLoading = false;
+    updateShowExamplesButton();
+    renderExampleResponse();
+  }
 }
 
 function nextWord() {
@@ -897,6 +963,9 @@ function completeLesson() {
   state.lesson.manualNextPending = false;
   setManualNextButtonVisible(false);
   state.lesson.done = true;
+  state.lesson.exampleRequestId += 1;
+  state.lesson.examplesLoading = false;
+  state.lesson.exampleResponse = "";
   closeChunkCongrats();
 
   const total = state.words.length;
@@ -906,6 +975,8 @@ function completeLesson() {
 
   updateLessonTopRow();
   setLessonControlsEnabled({ skip: false, reveal: false });
+  updateShowExamplesButton();
+  renderExampleResponse();
 
   els.progressText.textContent = `Completed all ${total} words.`;
   els.idText.textContent = "";
@@ -973,6 +1044,10 @@ function goToSetupPage() {
 
 function openTemplateUploadPage() {
   setPage("templateUpload");
+}
+
+function openChatPage() {
+  setPage("chat");
 }
 
 function sanitizeWordsArray(words) {
@@ -1172,6 +1247,9 @@ els.replayLessonBtn.addEventListener("click", startLesson);
 
 els.skipBtn.addEventListener("click", skipWord);
 els.revealBtn.addEventListener("click", revealAnswer);
+els.showExamplesBtn.addEventListener("click", () => {
+  void showExamples();
+});
 els.nextBtn.addEventListener("click", () => {
   if (!state.lesson.manualNextPending) return;
   nextWord();
@@ -1205,6 +1283,12 @@ window.addEventListener("keydown", (e) => {
 });
 
 // Initial
+initChatPage({
+  elements: els,
+  goToSetupPage,
+  goToChatPage: openChatPage
+});
+
 initTemplateUploadPage({
   elements: els,
   goToSetupPage,

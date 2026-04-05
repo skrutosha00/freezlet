@@ -168,7 +168,16 @@ h1 {
   display: block;
 }
 
+#chatPage:not(.hidden) {
+  display: block;
+}
+
 #templateUploadPage .panel {
+  display: grid;
+  gap: 18px;
+}
+
+#chatPage .panel {
   display: grid;
   gap: 18px;
 }
@@ -177,11 +186,23 @@ h1 {
   margin: 0;
 }
 
+#chatPage .panel > * {
+  margin: 0;
+}
+
 #templateUploadPage .feedback {
   margin-top: -2px;
 }
 
+#chatPage .feedback {
+  margin-top: -2px;
+}
+
 #templateUploadPage .row {
+  row-gap: 12px;
+}
+
+#chatPage .row {
   row-gap: 12px;
 }
 
@@ -242,6 +263,7 @@ label.section-title {
 
 select,
 input[type="text"],
+input[type="password"],
 textarea {
   width: 100%;
   padding: 10px 12px;
@@ -253,12 +275,14 @@ textarea {
 @media (pointer: coarse) {
   select,
   input[type="text"],
+  input[type="password"],
   textarea {
     font-size: 16px;
   }
 }
 
 input[type="text"],
+input[type="password"],
 textarea {
   border: 1px solid var(--control-border);
   background: var(--control-bg);
@@ -269,6 +293,7 @@ textarea {
 }
 
 input[type="text"]:focus,
+input[type="password"]:focus,
 textarea:focus {
   border-color: var(--control-border-focus);
   background: var(--control-bg-focus);
@@ -407,6 +432,15 @@ textarea::placeholder {
 .feedback.bad {
   border-color: #dd7f97;
   background: #b24f66;
+}
+
+.exampleResponse.hidden {
+  display: none;
+}
+
+#exampleResponseText {
+  display: block;
+  white-space: pre-wrap;
 }
 
 .small {
