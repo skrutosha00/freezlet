@@ -254,7 +254,7 @@
             <label for="chatApiKeyInput" class="section-title">API key</label>
             <input
               id="chatApiKeyInput"
-              type="password"
+              type="text"
               placeholder="Paste your key"
               autocomplete="off"
               spellcheck="false" />
@@ -263,6 +263,49 @@
           <div>
             <label for="chatModelSelect" class="section-title">Model</label>
             <select id="chatModelSelect" aria-label="Choose chat model"></select>
+          </div>
+
+          <div>
+            <label for="chatSystemPromptInput" class="section-title">System prompt</label>
+            <textarea
+              id="chatSystemPromptInput"
+              rows="2"
+              placeholder="Optional system prompt"
+              spellcheck="true"
+            ></textarea>
+          </div>
+
+          <div class="chatTranscript" id="chatTranscript" aria-live="polite"></div>
+
+          <div class="chatReplyOptions hidden" id="chatReplyOptions" aria-live="polite"></div>
+
+          <div class="chatReplyComposer hidden" id="chatReplyComposer">
+            <label for="chatAssistantReplyInput" class="section-title">Or write your own reply</label>
+            <textarea
+              id="chatAssistantReplyInput"
+              rows="3"
+              placeholder="Type your own assistant reply"
+              spellcheck="true"
+            ></textarea>
+
+            <div class="row">
+              <button class="btn btn-green" id="useCustomAssistantReplyBtn" type="button">Use custom reply</button>
+              <button class="btn btn-blue" id="regenerateChatRepliesBtn" type="button">Regenerate</button>
+            </div>
+          </div>
+
+          <div>
+            <label for="chatMessageInput" class="section-title">Message</label>
+            <textarea
+              id="chatMessageInput"
+              rows="3"
+              placeholder="Type a message for the chat"
+              spellcheck="true"
+            ></textarea>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-blue" id="sendChatMessageBtn" type="button">Send</button>
           </div>
         </section>
       </section>

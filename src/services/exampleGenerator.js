@@ -1,4 +1,4 @@
-const WORKER_URL = "https://openaiproxy.sergeisu00.workers.dev/";
+export const WORKER_URL = "https://openaiproxy.sergeisu00.workers.dev/";
 const MODEL = "gpt-5.4";
 
 export async function askGpt(messages) {
